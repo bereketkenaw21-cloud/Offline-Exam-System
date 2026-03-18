@@ -1,10 +1,10 @@
 {
-  "name": "Mertule Mariyam Exam",
+  "name": "Mertule Mariyam Exam System",
   "short_name": "MM-Exam",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#1a1a2e",
-  "theme_color": "#16213e",
+  "theme_color": "#e94560",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3534/3534033.png",
