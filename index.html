@@ -1,4 +1,4 @@
-ጅ<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="am">
 <head>
     <meta charset="UTF-8">
@@ -7,99 +7,183 @@
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        :root { --primary: #1a1a2e; --secondary: #16213e; --accent: #e94560; --text: #ffffff; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); overflow-x: hidden; }
-        .hidden { display: none !important; }
+        :root { 
+            --primary: #0f172a; 
+            --secondary: #1e293b; 
+            --accent: #3b82f6; 
+            --danger: #ef4444;
+            --success: #22c55e;
+            --text: #f8fafc; 
+        }
         
-        /* Splash Screen */
-        #splash { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle, #16213e, #1a1a2e); position: fixed; width: 100%; z-index: 1000; transition: 0.8s; }
-        .logo { font-size: 80px; margin-bottom: 20px; }
+        body { 
+            margin: 0; 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: var(--primary); 
+            color: var(--text); 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+        }
 
-        /* General Layout */
-        .container { padding: 20px; max-width: 600px; margin: auto; }
-        .btn { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; background: var(--secondary); color: white; font-size: 1.1rem; cursor: pointer; border: 1px solid #0f3460; transition: 0.3s; }
-        .btn:active { transform: scale(0.98); }
-        .accent-btn { background: var(--accent); }
+        .hidden { display: none !important; }
 
-        /* Question Box */
-        .q-card { background: #0f3460; padding: 20px; border-radius: 15px; margin-top: 20px; }
-        .option { display: block; background: #1a1a2e; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; border: 1px solid #16213e; }
-        .option.selected { border: 2px solid var(--accent); background: #16213e; }
+        /* --- ውብ SPLASH SCREEN --- */
+        #splash { 
+            height: 100vh; 
+            width: 100%;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            position: fixed; 
+            top: 0; left: 0;
+            z-index: 2000; 
+            transition: opacity 1s ease-out;
+        }
+        
+        .logo-anim {
+            font-size: 100px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
 
-        textarea { width: 100%; height: 150px; background: #1a1a2e; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px; border: 1px solid var(--accent); }
-        #ocr-status { color: #ffc107; font-size: 0.8rem; margin: 5px 0; }
+        .welcome-text {
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .welcome-text h2 { font-size: 1.8rem; color: #60a5fa; margin-bottom: 5px; }
+        .welcome-text p { font-size: 1.1rem; opacity: 0.8; }
+        .creator-tag { margin-top: 30px; padding: 5px 15px; background: rgba(59, 130, 246, 0.2); border-radius: 20px; color: #93c5fd; font-weight: bold; }
+
+        /* --- Layout & UI --- */
+        header { 
+            padding: 15px; 
+            background: var(--secondary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; width: 90%; }
+
+        .btn { 
+            width: 100%; 
+            padding: 18px; 
+            margin: 12px 0; 
+            border: none; 
+            border-radius: 16px; 
+            background: var(--secondary); 
+            color: white; 
+            font-size: 1.1rem; 
+            font-weight: 600;
+            cursor: pointer; 
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .accent-btn { background: var(--accent); box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); }
+
+        .q-card { background: var(--secondary); padding: 25px; border-radius: 20px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        
+        .option { 
+            background: rgba(255,255,255,0.05); 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+        
+        .option.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.15); }
+
+        textarea { width: 100%; height: 120px; background: #0f172a; color: white; border-radius: 12px; padding: 12px; border: 1px solid var(--accent); margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div id="splash">
-        <div class="logo">🎓</div>
-        <h2>እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት የተማሪወች የፈተና መለማመጃ ሲስተም በደህና መጣቹህ</h2>
-        <p style="color: #00d2ff;">አዘጋጅ፦ በረከት ቀናው</p>
+        <div class="logo-anim">🎓</div>
+        <div class="welcome-text">
+            <h2>እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት</h2>
+            <p>የተማሪወች የፈተና መለማመጃ ሲስተም</p>
+        </div>
+        <div class="creator-tag">አዘጋጅ፦ በረከት ቀናው</div>
     </div>
 
     <div id="app" class="hidden">
-        <header style="display: flex; justify-content: space-between; padding: 10px; background: var(--secondary);">
-            <div onclick="toggleLang()" style="cursor:pointer;">አማርኛ / EN</div>
-            <div id="timer" class="hidden">60:00</div>
+        <header>
+            <span style="font-weight: bold; color: #60a5fa;">MM Exam 2026</span>
+            <div id="timer" class="hidden" style="background: var(--danger); padding: 5px 12px; border-radius: 8px; font-family: monospace;">60:00</div>
         </header>
 
         <div class="container">
-            <div id="entry-page">
-                <button class="btn accent-btn" onclick="showRoles()">Start</button>
-            </div>
-
-            <div id="role-page" class="hidden">
-                <button class="btn" onclick="showStudentStream()">የተማሪዎች መግቢያ</button>
-                <button class="btn" onclick="promptAdmin()">የAdmin መግቢያ</button>
+            <div id="role-page">
+                <h3 style="text-align: center;">ለማቀጥል ምርጫዎን ያስገቡ</h3>
+                <button class="btn accent-btn" onclick="showStudentStream()">ተማሪ (Student)</button>
+                <button class="btn" onclick="promptAdmin()">አስተዳዳሪ (Admin)</button>
             </div>
 
             <div id="stream-page" class="hidden">
-                <button class="btn" onclick="loadSubjects('Social')">Social (ሶሻል)</button>
-                <button class="btn" onclick="loadSubjects('Natural')">Natural (ናቹራል)</button>
+                <button onclick="hideAll(); document.getElementById('role-page').classList.remove('hidden');" style="color: gray; background: none; border: none; cursor: pointer;">⬅ ተመለስ</button>
+                <h3 style="text-align: center;">ዘርፍዎን ይምረጡ</h3>
+                <button class="btn" onclick="loadSubjects('Social')">ሶሻል (Social)</button>
+                <button class="btn" onclick="loadSubjects('Natural')">ናቹራል (Natural)</button>
             </div>
+
             <div id="subject-page" class="hidden">
-                <h3 id="stream-title"></h3>
+                <button onclick="showStudentStream()" style="color: gray; background: none; border: none; cursor: pointer;">⬅ ተመለስ</button>
+                <h3 id="stream-title" style="text-align: center; color: var(--accent);"></h3>
                 <div id="subject-list"></div>
             </div>
 
             <div id="exam-page" class="hidden">
                 <div class="q-card">
-                    <h4 id="q-text"></h4>
+                    <h4 id="q-text" style="line-height: 1.5;"></h4>
                     <div id="options-list"></div>
                 </div>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
                     <button class="btn" onclick="prevQ()">Back</button>
                     <button class="btn accent-btn" onclick="nextQ()">Next</button>
                 </div>
-                <button class="btn" style="background: green;" onclick="finishExam()">Submit</button>
+                <button class="btn" style="background: var(--success);" onclick="finishExam()">ፈተናውን ጨርስ (Submit)</button>
             </div>
 
             <div id="result-page" class="hidden">
-                <h2>ውጤት</h2>
-                <h1 id="score-display"></h1>
-                <button class="btn" onclick="location.reload()">ተመለስ</button>
+                <div class="q-card" style="text-align: center;">
+                    <h2>የፈተና ውጤት</h2>
+                    <h1 id="score-display" style="font-size: 3rem; color: var(--accent);">0 / 0</h1>
+                    <button class="btn accent-btn" onclick="location.reload()">ወደ ዋና ገፅ ተመለስ</button>
+                </div>
             </div>
 
             <div id="admin-page" class="hidden">
-                <h3>Admin Control Panel</h3>
+                <h3>Admin Control</h3>
                 <select id="admin-stream" class="btn">
                     <option value="Natural">Natural</option>
                     <option value="Social">Social</option>
                 </select>
-                <input type="text" id="admin-sub" placeholder="Subject Name" class="btn">
-                
-                <div id="ocr-status"></div>
-                <textarea id="bulk-input" placeholder="ጥያቄዎችን እዚህ ይለጥፉ ወይም ፎቶ አንሱ..."></textarea>
-                
-                <div style="display: flex; gap: 5px;">
-                    <button class="btn" style="background:#28a745" onclick="openCamera()">📷 Camera</button>
+                <input type="text" id="admin-sub" placeholder="Subject (e.g. History)" class="btn">
+                <div id="ocr-status" style="color: #fbbf24; font-size: 0.8rem;"></div>
+                <textarea id="bulk-input" placeholder="Paste questions or use camera..."></textarea>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn" style="background: var(--success); font-size: 0.9rem;" onclick="openCamera()">📷 Camera</button>
                     <input type="file" id="file-input" accept="image/*" onchange="processFile(event)" class="hidden">
-                    <button class="btn" style="background:#17a2b8" onclick="document.getElementById('file-input').click()">🖼️ Gallery</button>
+                    <button class="btn" style="background: #0ea5e9; font-size: 0.9rem;" onclick="document.getElementById('file-input').click()">🖼️ Gallery</button>
                 </div>
-                
-                <button class="btn accent-btn" onclick="saveQuestions()">ጥያቄዎችን ጫን (Upload)</button>
-                <button class="btn" onclick="location.reload()">ውጣ</button>
+                <button class="btn accent-btn" onclick="saveQuestions()">ጥያቄዎቹን ጫን</button>
+                <button class="btn" onclick="location.reload()" style="background: none; border: 1px solid var(--danger); color: var(--danger);">ውጣ</button>
             </div>
         </div>
     </div>
@@ -107,87 +191,49 @@
     <script>
         let currentQuestions = [], currentIndex = 0, userAnswers = [], timer, timeRemaining = 3600;
 
-        // Splash
-        setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
+        // --- Splash Timeout ---
+        window.onload = () => {
             setTimeout(() => {
-                document.getElementById('splash').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-            }, 800);
-        }, 5000);
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash').classList.add('hidden');
+                    document.getElementById('app').classList.remove('hidden');
+                }, 1000);
+            }, 4000);
+        };
 
-        function showRoles() { hideAll(); document.getElementById('role-page').classList.remove('hidden'); }
+        function hideAll() {
+            ['role-page','stream-page','subject-page','exam-page','result-page','admin-page'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+        }
+
         function showStudentStream() { hideAll(); document.getElementById('stream-page').classList.remove('hidden'); }
         
         function promptAdmin() {
-            if(prompt("Admin Password:") === "Mertule Mariyam@2026") {
+            if(prompt("የአድሚን የይለፍ ቃል ያስገቡ:") === "Mertule Mariyam@2026") {
                 hideAll(); document.getElementById('admin-page').classList.remove('hidden');
-            } else alert("Error!");
+            } else alert("የይለፍ ቃል ተሳስቷል!");
         }
 
-        // Camera & OCR Logic
-        async function processPhoto(src) {
-            const status = document.getElementById('ocr-status');
-            status.innerText = "Processing image... please wait...";
-            try {
-                const worker = await Tesseract.createWorker('eng');
-                const { data: { text } } = await worker.recognize(src);
-                document.getElementById('bulk-input').value = text;
-                status.innerText = "Done! Review and edit the questions below.";
-                await worker.terminate();
-            } catch (e) { status.innerText = "OCR Error!"; }
-        }
-
-        function processFile(e) {
-            const reader = new FileReader();
-            reader.onload = (f) => processPhoto(f.target.result);
-            reader.readAsDataURL(e.target.files[0]);
-        }
-        function openCamera() {
-            document.getElementById('file-input').setAttribute('capture', 'camera');
-            document.getElementById('file-input').click();
-        }
-
-        // Smart Question Parsing & Save
-        function saveQuestions() {
-            let stream = document.getElementById('admin-stream').value;
-            let sub = document.getElementById('admin-sub').value;
-            let text = document.getElementById('bulk-input').value;
-            
-            let rawQs = text.split(/\d+\./).filter(q => q.trim().length > 5);
-            let parsed = rawQs.map(q => {
-                let parts = q.split(/[A-D]\./);
-                return {
-                    text: parts[0].trim(),
-                    A: parts[1]?.trim() || "Option A",
-                    B: parts[2]?.trim() || "Option B",
-                    C: parts[3]?.trim() || "Option C",
-                    D: parts[4]?.trim() || "Option D",
-                    ans: "A" 
-                };
-            });
-
-            let data = JSON.parse(localStorage.getItem('exams') || "{}");
-            if(!data[stream]) data[stream] = {};
-            data[stream][sub] = parsed;
-            localStorage.setItem('exams', JSON.stringify(data));
-            alert(parsed.length + " Questions Saved!");
-            location.reload();
-        }
-
+        // --- Subject Loading ---
         function loadSubjects(stream) {
             hideAll();
             document.getElementById('subject-page').classList.remove('hidden');
+            document.getElementById('stream-title').innerText = stream + " Subjects";
             let data = JSON.parse(localStorage.getItem('exams') || "{}")[stream];
             let list = document.getElementById('subject-list');
-            list.innerHTML = data ? "" : "ምንም ጥያቄ የለም";
-            if(data) Object.keys(data).forEach(s => {
-                let b = document.createElement('button');
-                b.className="btn"; b.innerText=s; b.onclick=()=>startExam(data[s]);
-                list.appendChild(b);
-            });
+            list.innerHTML = "";
+            if(data && Object.keys(data).length > 0) {
+                Object.keys(data).forEach(s => {
+                    let b = document.createElement('button');
+                    b.className="btn"; b.innerText=s; b.onclick=()=>startExam(data[s]);
+                    list.appendChild(b);
+                });
+            } else { list.innerHTML = "<p style='text-align:center; opacity:0.5;'>ምንም የተጫነ ፈተና የለም።</p>"; }
         }
 
+        // --- Exam Logic ---
         function startExam(qs) {
             currentQuestions = qs; currentIndex = 0; userAnswers = new Array(qs.length).fill(null);
             hideAll(); document.getElementById('exam-page').classList.remove('hidden');
@@ -209,7 +255,6 @@
         }
 
         function nextQ() { 
-            if(!userAnswers[currentIndex]) return alert("መልስ ይምረጡ!");
             if(currentIndex < currentQuestions.length-1) { currentIndex++; renderQuestion(); } 
         }
         function prevQ() { if(currentIndex > 0) { currentIndex--; renderQuestion(); } }
@@ -231,19 +276,38 @@
             document.getElementById('score-display').innerText = score + " / " + currentQuestions.length;
         }
 
-        function hideAll() {
-            ['role-page','stream-page','subject-page','exam-page','result-page','admin-page','entry-page'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
+        // --- Admin OCR & Save ---
+        async function processPhoto(src) {
+            const status = document.getElementById('ocr-status'); status.innerText = "Processing image...";
+            try {
+                const worker = await Tesseract.createWorker('eng');
+                const { data: { text } } = await worker.recognize(src);
+                document.getElementById('bulk-input').value = text;
+                status.innerText = "Done!"; await worker.terminate();
+            } catch (e) { status.innerText = "Error!"; }
         }
-        function toggleLang() { alert("ቋንቋ መቀየሪያ በቅርብ ቀን..."); }
+        function processFile(e) { const reader = new FileReader(); reader.onload = (f) => processPhoto(f.target.result); reader.readAsDataURL(e.target.files[0]); }
+        function openCamera() { document.getElementById('file-input').setAttribute('capture', 'camera'); document.getElementById('file-input').click(); }
 
-        // --- SERVICE WORKER REGISTRATION (አዲስ የተጨመረ) ---
+        function saveQuestions() {
+            let stream = document.getElementById('admin-stream').value, sub = document.getElementById('admin-sub').value, text = document.getElementById('bulk-input').value;
+            if(!sub || !text) return alert("ሁሉንም ይሙሉ!");
+            let rawQs = text.split(/\d+\./).filter(q => q.trim().length > 5);
+            let parsed = rawQs.map(q => {
+                let parts = q.split(/[A-D]\./);
+                return { text: parts[0].trim(), A: parts[1]?.trim() || "A", B: parts[2]?.trim() || "B", C: parts[3]?.trim() || "C", D: parts[4]?.trim() || "D", ans: "A" };
+            });
+            let data = JSON.parse(localStorage.getItem('exams') || "{}");
+            if(!data[stream]) data[stream] = {};
+            data[stream][sub] = parsed;
+            localStorage.setItem('exams', JSON.stringify(data));
+            alert(parsed.length + " ጥያቄዎች ተጭነዋል!"); location.reload();
+        }
+
+        // --- SERVICE WORKER (FOR INSTALLATION) ---
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-              .then(reg => console.log('Service Worker Registered!'))
-              .catch(err => console.log('Service Worker Failed!', err));
+            navigator.serviceWorker.register('sw.js').then(reg => console.log('PWA Ready')).catch(err => console.log('PWA Failed'));
           });
         }
     </script>
