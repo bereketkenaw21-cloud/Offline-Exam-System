@@ -3,313 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mertule Mariyam Exam System 2026</title>
+    <title>Mertule Mariyam Exam</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        :root { 
-            --primary: #0f172a; 
-            --secondary: #1e293b; 
-            --accent: #3b82f6; 
-            --danger: #ef4444;
-            --success: #22c55e;
-            --text: #f8fafc; 
+        :root {
+            --bg-gradient: linear-gradient(180deg, #1e1e3f 0%, #111122 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --btn-blue: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+            --btn-purple: linear-gradient(90deg, #9d50bb 0%, #6e48aa 100%);
+            --text-color: #ffffff;
         }
-        
-        body { 
-            margin: 0; 
-            font-family: 'Inter', 'Segoe UI', sans-serif; 
-            background: var(--primary); 
-            color: var(--text); 
-            display: flex; 
-            flex-direction: column; 
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .hidden { display: none !important; }
 
-        /* --- ውብ SPLASH SCREEN --- */
-        #splash { 
-            height: 100vh; 
+        header {
             width: 100%;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center; 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            position: fixed; 
-            top: 0; left: 0;
-            z-index: 2000; 
-            transition: opacity 1s ease-out;
-        }
-        
-        .logo-anim {
-            font-size: 100px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .welcome-text {
-            margin-top: 20px;
-            padding: 0 20px;
-        }
-
-        .welcome-text h2 { font-size: 1.8rem; color: #60a5fa; margin-bottom: 5px; }
-        .welcome-text p { font-size: 1.1rem; opacity: 0.8; }
-        .creator-tag { margin-top: 30px; padding: 5px 15px; background: rgba(59, 130, 246, 0.2); border-radius: 20px; color: #93c5fd; font-weight: bold; }
-
-        /* --- Layout & UI --- */
-        header { 
-            padding: 15px; 
-            background: var(--secondary); 
-            display: flex; 
-            justify-content: space-between; 
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: rgba(0,0,0,0.2);
         }
 
-        .container { padding: 20px; max-width: 500px; margin: 0 auto; width: 90%; }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            margin-top: 50px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
 
-        .btn { 
-            width: 100%; 
-            padding: 18px; 
-            margin: 12px 0; 
-            border: none; 
-            border-radius: 16px; 
-            background: var(--secondary); 
-            color: white; 
-            font-size: 1.1rem; 
-            font-weight: 600;
-            cursor: pointer; 
-            transition: all 0.2s;
+        h2 { font-size: 1.5rem; margin-bottom: 20px; color: #00d2ff; }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            text-decoration: none;
+        }
+
+        .btn-blue { background: var(--btn-blue); }
+        .btn-purple { background: var(--btn-purple); }
+        .btn-gray { background: #555; }
+
+        .logo-img { width: 80px; margin-bottom: 20px; }
+
+        /* Exam Page UI */
+        .q-card { text-align: left; margin-top: 20px; }
+        .option {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
-
-        .btn:active { transform: scale(0.95); }
-        .accent-btn { background: var(--accent); box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); }
-
-        .q-card { background: var(--secondary); padding: 25px; border-radius: 20px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        
-        .option { 
-            background: rgba(255,255,255,0.05); 
-            padding: 15px; 
-            margin: 10px 0; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            border: 1px solid transparent;
-            transition: 0.3s;
-        }
-        
-        .option.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.15); }
-
-        textarea { width: 100%; height: 120px; background: #0f172a; color: white; border-radius: 12px; padding: 12px; border: 1px solid var(--accent); margin-bottom: 10px; }
+        .option.selected { border: 2px solid #00d2ff; background: rgba(0,210,255,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <div class="logo-anim">🎓</div>
-        <div class="welcome-text">
-            <h2>እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት</h2>
-            <p>የተማሪወች የፈተና መለማመጃ ሲስተም</p>
-        </div>
-        <div class="creator-tag">አዘጋጅ፦ በረከት ቀናው</div>
+    <header>
+        <span style="font-weight: bold;">Mertule Mariyam Exam</span>
+        <div id="timer-display" class="hidden" style="background:red; padding:2px 8px; border-radius:5px;">60:00</div>
+    </header>
+
+    <div id="welcome-page" class="container">
+        <img src="https://cdn-icons-png.flaticon.com/512/3534/3534033.png" class="logo-img" alt="logo">
+        <h2 style="color: #fff;">እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት የተማሪወች የፈተና መለማመጃ ሲስተም በደህና መጣቹህ!</h2>
+        <p style="color: #ffeb3b;">አዘጋጅ፦ በረከት ቀናው</p>
+        <button class="btn btn-blue" onclick="showPage('role-page')">ጀምር</button>
     </div>
 
-    <div id="app" class="hidden">
-        <header>
-            <span style="font-weight: bold; color: #60a5fa;">MM Exam 2026</span>
-            <div id="timer" class="hidden" style="background: var(--danger); padding: 5px 12px; border-radius: 8px; font-family: monospace;">60:00</div>
-        </header>
+    <div id="role-page" class="container hidden">
+        <h2>ማን ነዎት?</h2>
+        <button class="btn btn-blue" onclick="showPage('stream-page')">ተማሪ (Student)</button>
+        <button class="btn btn-blue" onclick="promptAdmin()">አድሚን (Admin)</button>
+        <button class="btn btn-gray" onclick="showPage('welcome-page')">ወደ ኋላ</button>
+    </div>
 
-        <div class="container">
-            <div id="role-page">
-                <h3 style="text-align: center;">ለማቀጥል ምርጫዎን ያስገቡ</h3>
-                <button class="btn accent-btn" onclick="showStudentStream()">ተማሪ (Student)</button>
-                <button class="btn" onclick="promptAdmin()">አስተዳዳሪ (Admin)</button>
-            </div>
+    <div id="stream-page" class="container hidden">
+        <h2>ዘርፍ ይምረጡ</h2>
+        <button class="btn btn-blue" onclick="loadSubjects('Social')">Social Science</button>
+        <button class="btn btn-blue" onclick="loadSubjects('Natural')">Natural Science</button>
+        <button class="btn btn-gray" onclick="showPage('role-page')">ወደ ኋላ</button>
+    </div>
 
-            <div id="stream-page" class="hidden">
-                <button onclick="hideAll(); document.getElementById('role-page').classList.remove('hidden');" style="color: gray; background: none; border: none; cursor: pointer;">⬅ ተመለስ</button>
-                <h3 style="text-align: center;">ዘርፍዎን ይምረጡ</h3>
-                <button class="btn" onclick="loadSubjects('Social')">ሶሻል (Social)</button>
-                <button class="btn" onclick="loadSubjects('Natural')">ናቹራል (Natural)</button>
-            </div>
+    <div id="subject-page" class="container hidden">
+        <h2>ትምህርት ይምረጡ</h2>
+        <div id="subject-list"></div>
+        <button class="btn btn-gray" onclick="showPage('stream-page')">ወደ ኋላ</button>
+    </div>
 
-            <div id="subject-page" class="hidden">
-                <button onclick="showStudentStream()" style="color: gray; background: none; border: none; cursor: pointer;">⬅ ተመለስ</button>
-                <h3 id="stream-title" style="text-align: center; color: var(--accent);"></h3>
-                <div id="subject-list"></div>
-            </div>
-
-            <div id="exam-page" class="hidden">
-                <div class="q-card">
-                    <h4 id="q-text" style="line-height: 1.5;"></h4>
-                    <div id="options-list"></div>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="btn" onclick="prevQ()">Back</button>
-                    <button class="btn accent-btn" onclick="nextQ()">Next</button>
-                </div>
-                <button class="btn" style="background: var(--success);" onclick="finishExam()">ፈተናውን ጨርስ (Submit)</button>
-            </div>
-
-            <div id="result-page" class="hidden">
-                <div class="q-card" style="text-align: center;">
-                    <h2>የፈተና ውጤት</h2>
-                    <h1 id="score-display" style="font-size: 3rem; color: var(--accent);">0 / 0</h1>
-                    <button class="btn accent-btn" onclick="location.reload()">ወደ ዋና ገፅ ተመለስ</button>
-                </div>
-            </div>
-
-            <div id="admin-page" class="hidden">
-                <h3>Admin Control</h3>
-                <select id="admin-stream" class="btn">
-                    <option value="Natural">Natural</option>
-                    <option value="Social">Social</option>
-                </select>
-                <input type="text" id="admin-sub" placeholder="Subject (e.g. History)" class="btn">
-                <div id="ocr-status" style="color: #fbbf24; font-size: 0.8rem;"></div>
-                <textarea id="bulk-input" placeholder="Paste questions or use camera..."></textarea>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn" style="background: var(--success); font-size: 0.9rem;" onclick="openCamera()">📷 Camera</button>
-                    <input type="file" id="file-input" accept="image/*" onchange="processFile(event)" class="hidden">
-                    <button class="btn" style="background: #0ea5e9; font-size: 0.9rem;" onclick="document.getElementById('file-input').click()">🖼️ Gallery</button>
-                </div>
-                <button class="btn accent-btn" onclick="saveQuestions()">ጥያቄዎቹን ጫን</button>
-                <button class="btn" onclick="location.reload()" style="background: none; border: 1px solid var(--danger); color: var(--danger);">ውጣ</button>
-            </div>
+    <div id="exam-page" class="container hidden" style="max-width: 600px;">
+        <div class="q-card">
+            <h4 id="q-text"></h4>
+            <div id="options-list"></div>
         </div>
+        <button class="btn btn-blue" onclick="nextQ()">ቀጣይ (Next)</button>
+        <button class="btn btn-purple" onclick="finishExam()">ጨርስ (Submit)</button>
+    </div>
+
+    <div id="admin-page" class="container hidden">
+        <h2>Admin Panel</h2>
+        <select id="adm-stream" class="btn btn-gray" style="background:#333">
+            <option value="Natural">Natural</option>
+            <option value="Social">Social</option>
+        </select>
+        <input type="text" id="adm-sub" placeholder="የሳብጀክት ስም (ምሳሌ፡ English)" class="btn" style="background:#333; border:1px solid #555">
+        <textarea id="bulk-input" class="btn" style="height:100px; background:#000; text-align:left;" placeholder="ጥያቄዎችን እዚህ ይለጥፉ..."></textarea>
+        <button class="btn btn-blue" onclick="saveQuestions()">ጥያቄዎቹን ጫን</button>
+        <button class="btn btn-gray" onclick="location.reload()">ውጣ</button>
     </div>
 
     <script>
-        let currentQuestions = [], currentIndex = 0, userAnswers = [], timer, timeRemaining = 3600;
+        let currentQs = [], curIdx = 0, answers = [], timer;
 
-        // --- Splash Timeout ---
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash').classList.add('hidden');
-                    document.getElementById('app').classList.remove('hidden');
-                }, 1000);
-            }, 4000);
-        };
-
-        function hideAll() {
-            ['role-page','stream-page','subject-page','exam-page','result-page','admin-page'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
+        function showPage(id) {
+            document.querySelectorAll('.container').forEach(p => p.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function showStudentStream() { hideAll(); document.getElementById('stream-page').classList.remove('hidden'); }
-        
         function promptAdmin() {
-            if(prompt("የአድሚን የይለፍ ቃል ያስገቡ:") === "Mertule Mariyam@2026") {
-                hideAll(); document.getElementById('admin-page').classList.remove('hidden');
-            } else alert("የይለፍ ቃል ተሳስቷል!");
+            if(prompt("Password:") === "Mertule Mariyam@2026") showPage('admin-page');
         }
 
-        // --- Subject Loading ---
         function loadSubjects(stream) {
-            hideAll();
-            document.getElementById('subject-page').classList.remove('hidden');
-            document.getElementById('stream-title').innerText = stream + " Subjects";
-            let data = JSON.parse(localStorage.getItem('exams') || "{}")[stream];
+            showPage('subject-page');
+            let data = JSON.parse(localStorage.getItem('exams') || "{}")[stream] || {};
             let list = document.getElementById('subject-list');
             list.innerHTML = "";
-            if(data && Object.keys(data).length > 0) {
-                Object.keys(data).forEach(s => {
-                    let b = document.createElement('button');
-                    b.className="btn"; b.innerText=s; b.onclick=()=>startExam(data[s]);
-                    list.appendChild(b);
-                });
-            } else { list.innerHTML = "<p style='text-align:center; opacity:0.5;'>ምንም የተጫነ ፈተና የለም።</p>"; }
-        }
-
-        // --- Exam Logic ---
-        function startExam(qs) {
-            currentQuestions = qs; currentIndex = 0; userAnswers = new Array(qs.length).fill(null);
-            hideAll(); document.getElementById('exam-page').classList.remove('hidden');
-            document.getElementById('timer').classList.remove('hidden');
-            renderQuestion(); startTimer();
-        }
-
-        function renderQuestion() {
-            let q = currentQuestions[currentIndex];
-            document.getElementById('q-text').innerText = (currentIndex+1) + ". " + q.text;
-            let opts = document.getElementById('options-list'); opts.innerHTML = "";
-            ['A','B','C','D'].forEach(l => {
-                let d = document.createElement('div');
-                d.className = "option " + (userAnswers[currentIndex] === l ? "selected" : "");
-                d.innerText = l + ". " + q[l];
-                d.onclick = () => { userAnswers[currentIndex] = l; renderQuestion(); };
-                opts.appendChild(d);
+            
+            Object.keys(data).forEach(sub => {
+                let b = document.createElement('button');
+                b.className = "btn btn-blue";
+                b.innerText = sub;
+                b.onclick = () => startExam(data[sub]);
+                list.appendChild(b);
             });
+            if(Object.keys(data).length === 0) list.innerHTML = "<p>ምንም ፈተና የለም</p>";
         }
 
-        function nextQ() { 
-            if(currentIndex < currentQuestions.length-1) { currentIndex++; renderQuestion(); } 
-        }
-        function prevQ() { if(currentIndex > 0) { currentIndex--; renderQuestion(); } }
-
-        function startTimer() {
-            timer = setInterval(() => {
-                timeRemaining--;
-                let m = Math.floor(timeRemaining/60), s = timeRemaining % 60;
-                document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
-                if(timeRemaining <= 0) finishExam();
-            }, 1000);
+        function startExam(qs) {
+            currentQs = qs; curIdx = 0; answers = new Array(qs.length).fill(null);
+            showPage('exam-page');
+            document.getElementById('timer-display').classList.remove('hidden');
+            renderQ();
         }
 
-        function finishExam() {
-            clearInterval(timer); hideAll();
-            document.getElementById('result-page').classList.remove('hidden');
-            let score = 0;
-            currentQuestions.forEach((q, i) => { if(userAnswers[i] === q.ans) score++; });
-            document.getElementById('score-display').innerText = score + " / " + currentQuestions.length;
+        function renderQ() {
+            let q = currentQs[curIdx];
+            document.getElementById('q-text').innerText = (curIdx+1) + ". " + q.text;
+            let html = "";
+            ['A','B','C','D'].forEach(l => {
+                html += `<div class="option ${answers[curIdx]===l?'selected':''}" onclick="answers[${curIdx}]='${l}';renderQ()">${l}. ${q[l]}</div>`;
+            });
+            document.getElementById('options-list').innerHTML = html;
         }
 
-        // --- Admin OCR & Save ---
-        async function processPhoto(src) {
-            const status = document.getElementById('ocr-status'); status.innerText = "Processing image...";
-            try {
-                const worker = await Tesseract.createWorker('eng');
-                const { data: { text } } = await worker.recognize(src);
-                document.getElementById('bulk-input').value = text;
-                status.innerText = "Done!"; await worker.terminate();
-            } catch (e) { status.innerText = "Error!"; }
-        }
-        function processFile(e) { const reader = new FileReader(); reader.onload = (f) => processPhoto(f.target.result); reader.readAsDataURL(e.target.files[0]); }
-        function openCamera() { document.getElementById('file-input').setAttribute('capture', 'camera'); document.getElementById('file-input').click(); }
+        function nextQ() { if(curIdx < currentQs.length-1) { curIdx++; renderQ(); } }
 
         function saveQuestions() {
-            let stream = document.getElementById('admin-stream').value, sub = document.getElementById('admin-sub').value, text = document.getElementById('bulk-input').value;
+            let stream = document.getElementById('adm-stream').value;
+            let sub = document.getElementById('adm-sub').value;
+            let text = document.getElementById('bulk-input').value;
             if(!sub || !text) return alert("ሁሉንም ይሙሉ!");
-            let rawQs = text.split(/\d+\./).filter(q => q.trim().length > 5);
-            let parsed = rawQs.map(q => {
-                let parts = q.split(/[A-D]\./);
-                return { text: parts[0].trim(), A: parts[1]?.trim() || "A", B: parts[2]?.trim() || "B", C: parts[3]?.trim() || "C", D: parts[4]?.trim() || "D", ans: "A" };
+
+            let raw = text.split(/\d+\./).filter(q => q.trim().length > 5);
+            let parsed = raw.map(q => {
+                let p = q.split(/[A-D]\./);
+                return { text:p[0].trim(), A:p[1]?.trim(), B:p[2]?.trim(), C:p[3]?.trim(), D:p[4]?.trim(), ans:"A" };
             });
+
             let data = JSON.parse(localStorage.getItem('exams') || "{}");
             if(!data[stream]) data[stream] = {};
             data[stream][sub] = parsed;
             localStorage.setItem('exams', JSON.stringify(data));
-            alert(parsed.length + " ጥያቄዎች ተጭነዋል!"); location.reload();
+            alert("ተሳክቷል!"); location.reload();
         }
 
-        // --- SERVICE WORKER (FOR INSTALLATION) ---
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => console.log('PWA Ready')).catch(err => console.log('PWA Failed'));
-          });
-        }
+        function finishExam() { alert("ፈተናው ተጠናቋል!"); location.reload(); }
+
+        // PWA Registration
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     </script>
 </body>
 </html>
