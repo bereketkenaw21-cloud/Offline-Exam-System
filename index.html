@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mertule Mariyam Exam System</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        #splash { text-align: center; transition: 1s; }
+        .hidden { display: none !important; }
+        .btn { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; background: #0f3460; color: white; border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .admin-btn { position: fixed; bottom: 20px; right: 20px; background: #e94560; padding: 10px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="splash">
+        <h1 style="font-size: 2rem;">እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት የተማሪወች የፈተና መለማመጃ ሲስተም በደህና መጣቹህ</h1>
+        <p>አዘጋጅ፦ በረከት ቀናው</p>
+    </div>
+
+    <div id="main-menu" class="hidden">
+        <button class="btn" onclick="alert('Student Login Coming Soon...')">Start Exam</button>
+        <div class="admin-btn" onclick="adminLogin()">Admin Access</div>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+        }, 5000);
+
+        function adminLogin() {
+            let pass = prompt("የአድሚን ፓስወርድ ያስገቡ:");
+            if(pass === "Mertule Mariyam@2026") {
+                alert("እንኳን ደህና መጡ አድሚን!");
+            } else {
+                alert("የተሳሳተ ፓስወርድ!");
+            }
+        }
+    </script>
+</body>
+</html>
