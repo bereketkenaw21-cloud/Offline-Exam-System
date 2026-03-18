@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ጅ<!DOCTYPE html>
 <html lang="am">
 <head>
     <meta charset="UTF-8">
@@ -154,7 +154,6 @@
             let sub = document.getElementById('admin-sub').value;
             let text = document.getElementById('bulk-input').value;
             
-            // Smart Parsing: Splits by number (e.g., 1., 2.)
             let rawQs = text.split(/\d+\./).filter(q => q.trim().length > 5);
             let parsed = rawQs.map(q => {
                 let parts = q.split(/[A-D]\./);
@@ -164,7 +163,7 @@
                     B: parts[2]?.trim() || "Option B",
                     C: parts[3]?.trim() || "Option C",
                     D: parts[4]?.trim() || "Option D",
-                    ans: "A" // Default answer
+                    ans: "A" 
                 };
             });
 
@@ -176,7 +175,6 @@
             location.reload();
         }
 
-        // Subject & Exam Logic
         function loadSubjects(stream) {
             hideAll();
             document.getElementById('subject-page').classList.remove('hidden');
@@ -239,6 +237,15 @@
             });
         }
         function toggleLang() { alert("ቋንቋ መቀየሪያ በቅርብ ቀን..."); }
+
+        // --- SERVICE WORKER REGISTRATION (አዲስ የተጨመረ) ---
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+              .then(reg => console.log('Service Worker Registered!'))
+              .catch(err => console.log('Service Worker Failed!', err));
+          });
+        }
     </script>
 </body>
 </html>
