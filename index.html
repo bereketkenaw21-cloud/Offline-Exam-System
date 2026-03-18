@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mertule Mariyam Exam System 2026</title>
     <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root { --primary: #1a1a2e; --secondary: #16213e; --accent: #e94560; --text: #ffffff; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); overflow-x: hidden; }
@@ -20,16 +21,13 @@
         .btn:active { transform: scale(0.98); }
         .accent-btn { background: var(--accent); }
 
-        /* Header */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--secondary); }
-
         /* Question Box */
         .q-card { background: #0f3460; padding: 20px; border-radius: 15px; margin-top: 20px; }
         .option { display: block; background: #1a1a2e; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; border: 1px solid #16213e; }
         .option.selected { border: 2px solid var(--accent); background: #16213e; }
 
-        /* Admin Styles */
-        textarea { width: 100%; height: 150px; background: #1a1a2e; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+        textarea { width: 100%; height: 150px; background: #1a1a2e; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px; border: 1px solid var(--accent); }
+        #ocr-status { color: #ffc107; font-size: 0.8rem; margin: 5px 0; }
     </style>
 </head>
 <body>
@@ -41,8 +39,8 @@
     </div>
 
     <div id="app" class="hidden">
-        <header>
-            <div id="lang-toggle" onclick="toggleLang()">ET / EN</div>
+        <header style="display: flex; justify-content: space-between; padding: 10px; background: var(--secondary);">
+            <div onclick="toggleLang()" style="cursor:pointer;">አማርኛ / EN</div>
             <div id="timer" class="hidden">60:00</div>
         </header>
 
@@ -52,15 +50,14 @@
             </div>
 
             <div id="role-page" class="hidden">
-                <button class="btn" onclick="showStudentStream()">የተማሪዎች መግቢያ (Student)</button>
-                <button class="btn" onclick="promptAdmin()">የአድሚን መግቢያ (Admin)</button>
+                <button class="btn" onclick="showStudentStream()">የተማሪዎች መግቢያ</button>
+                <button class="btn" onclick="promptAdmin()">የAdmin መግቢያ</button>
             </div>
 
             <div id="stream-page" class="hidden">
                 <button class="btn" onclick="loadSubjects('Social')">Social (ሶሻል)</button>
                 <button class="btn" onclick="loadSubjects('Natural')">Natural (ናቹራል)</button>
             </div>
-
             <div id="subject-page" class="hidden">
                 <h3 id="stream-title"></h3>
                 <div id="subject-list"></div>
@@ -79,21 +76,28 @@
             </div>
 
             <div id="result-page" class="hidden">
-                <h2>የፈተና ውጤት</h2>
-                <h1 id="score-display">0/0</h1>
-                <div id="review-section"></div>
-                <button class="btn" onclick="location.reload()">ወደ ዋና ገፅ ተመለስ</button>
+                <h2>ውጤት</h2>
+                <h1 id="score-display"></h1>
+                <button class="btn" onclick="location.reload()">ተመለስ</button>
             </div>
 
             <div id="admin-page" class="hidden">
-                <h3>Admin Dashboard</h3>
+                <h3>Admin Control Panel</h3>
                 <select id="admin-stream" class="btn">
                     <option value="Natural">Natural</option>
                     <option value="Social">Social</option>
                 </select>
-                <input type="text" id="admin-sub" placeholder="የሳብጀክት ስም (ምሳሌ: Maths)" class="btn">
-                <textarea id="bulk-input" placeholder="ጥያቄዎችን እዚህ ይለጥፉ (Paste Questions Here)..."></textarea>
-                <p style="font-size: 0.8rem;">* ማሳሰቢያ፦ ጥያቄዎችን ከ PDF ኮፒ አድርገው እዚህ ሲለጥፉ ሲስተሙ በራሱ ያደራጃቸዋል።</p>
+                <input type="text" id="admin-sub" placeholder="Subject Name" class="btn">
+                
+                <div id="ocr-status"></div>
+                <textarea id="bulk-input" placeholder="ጥያቄዎችን እዚህ ይለጥፉ ወይም ፎቶ አንሱ..."></textarea>
+                
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn" style="background:#28a745" onclick="openCamera()">📷 Camera</button>
+                    <input type="file" id="file-input" accept="image/*" onchange="processFile(event)" class="hidden">
+                    <button class="btn" style="background:#17a2b8" onclick="document.getElementById('file-input').click()">🖼️ Gallery</button>
+                </div>
+                
                 <button class="btn accent-btn" onclick="saveQuestions()">ጥያቄዎችን ጫን (Upload)</button>
                 <button class="btn" onclick="location.reload()">ውጣ</button>
             </div>
@@ -101,14 +105,9 @@
     </div>
 
     <script>
-        // ---------------- CONFIG & DATA ----------------
-        let currentQuestions = [];
-        let currentIndex = 0;
-        let userAnswers = [];
-        let timer;
-        let timeRemaining = 3600;
+        let currentQuestions = [], currentIndex = 0, userAnswers = [], timer, timeRemaining = 3600;
 
-        // 1. Splash Timeout
+        // Splash
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
             setTimeout(() => {
@@ -117,111 +116,121 @@
             }, 800);
         }, 5000);
 
-        // 2. Navigation Functions
         function showRoles() { hideAll(); document.getElementById('role-page').classList.remove('hidden'); }
         function showStudentStream() { hideAll(); document.getElementById('stream-page').classList.remove('hidden'); }
         
         function promptAdmin() {
-            let p = prompt("Password ያስገቡ:");
-            if(p === "Mertule Mariyam@2026") {
+            if(prompt("Admin Password:") === "Mertule Mariyam@2026") {
                 hideAll(); document.getElementById('admin-page').classList.remove('hidden');
-            } else { alert("ተሳሳቱ!"); }
+            } else alert("Error!");
         }
 
+        // Camera & OCR Logic
+        async function processPhoto(src) {
+            const status = document.getElementById('ocr-status');
+            status.innerText = "Processing image... please wait...";
+            try {
+                const worker = await Tesseract.createWorker('eng');
+                const { data: { text } } = await worker.recognize(src);
+                document.getElementById('bulk-input').value = text;
+                status.innerText = "Done! Review and edit the questions below.";
+                await worker.terminate();
+            } catch (e) { status.innerText = "OCR Error!"; }
+        }
+
+        function processFile(e) {
+            const reader = new FileReader();
+            reader.onload = (f) => processPhoto(f.target.result);
+            reader.readAsDataURL(e.target.files[0]);
+        }
+        function openCamera() {
+            document.getElementById('file-input').setAttribute('capture', 'camera');
+            document.getElementById('file-input').click();
+        }
+
+        // Smart Question Parsing & Save
+        function saveQuestions() {
+            let stream = document.getElementById('admin-stream').value;
+            let sub = document.getElementById('admin-sub').value;
+            let text = document.getElementById('bulk-input').value;
+            
+            // Smart Parsing: Splits by number (e.g., 1., 2.)
+            let rawQs = text.split(/\d+\./).filter(q => q.trim().length > 5);
+            let parsed = rawQs.map(q => {
+                let parts = q.split(/[A-D]\./);
+                return {
+                    text: parts[0].trim(),
+                    A: parts[1]?.trim() || "Option A",
+                    B: parts[2]?.trim() || "Option B",
+                    C: parts[3]?.trim() || "Option C",
+                    D: parts[4]?.trim() || "Option D",
+                    ans: "A" // Default answer
+                };
+            });
+
+            let data = JSON.parse(localStorage.getItem('exams') || "{}");
+            if(!data[stream]) data[stream] = {};
+            data[stream][sub] = parsed;
+            localStorage.setItem('exams', JSON.stringify(data));
+            alert(parsed.length + " Questions Saved!");
+            location.reload();
+        }
+
+        // Subject & Exam Logic
         function loadSubjects(stream) {
             hideAll();
             document.getElementById('subject-page').classList.remove('hidden');
-            document.getElementById('stream-title').innerText = stream + " Subjects";
-            // LocalStorage ውስጥ ያሉትን ሳብጀክቶች መፈለግ
-            let data = JSON.parse(localStorage.getItem('exams') || "{}");
+            let data = JSON.parse(localStorage.getItem('exams') || "{}")[stream];
             let list = document.getElementById('subject-list');
-            list.innerHTML = "";
-            if(data[stream]) {
-                Object.keys(data[stream]).forEach(sub => {
-                    let b = document.createElement('button');
-                    b.className = "btn";
-                    b.innerText = sub;
-                    b.onclick = () => startExam(stream, sub);
-                    list.appendChild(b);
-                });
-            } else { list.innerHTML = "ምንም ጥያቄ አልተጫነም!"; }
+            list.innerHTML = data ? "" : "ምንም ጥያቄ የለም";
+            if(data) Object.keys(data).forEach(s => {
+                let b = document.createElement('button');
+                b.className="btn"; b.innerText=s; b.onclick=()=>startExam(data[s]);
+                list.appendChild(b);
+            });
         }
 
-        // 3. Exam Logic
-        function startExam(stream, sub) {
-            let data = JSON.parse(localStorage.getItem('exams'));
-            currentQuestions = data[stream][sub];
-            currentIndex = 0;
-            userAnswers = new Array(currentQuestions.length).fill(null);
-            hideAll();
-            document.getElementById('exam-page').classList.remove('hidden');
+        function startExam(qs) {
+            currentQuestions = qs; currentIndex = 0; userAnswers = new Array(qs.length).fill(null);
+            hideAll(); document.getElementById('exam-page').classList.remove('hidden');
             document.getElementById('timer').classList.remove('hidden');
-            renderQuestion();
-            startTimer();
+            renderQuestion(); startTimer();
         }
 
         function renderQuestion() {
             let q = currentQuestions[currentIndex];
-            document.getElementById('q-text').innerText = `${currentIndex + 1}. ${q.text}`;
-            let opts = document.getElementById('options-list');
-            opts.innerHTML = "";
-            ['A','B','C','D'].forEach(letter => {
-                let div = document.createElement('div');
-                div.className = "option " + (userAnswers[currentIndex] === letter ? "selected" : "");
-                div.innerText = letter + ". " + q[letter];
-                div.onclick = () => { userAnswers[currentIndex] = letter; renderQuestion(); };
-                opts.appendChild(div);
+            document.getElementById('q-text').innerText = (currentIndex+1) + ". " + q.text;
+            let opts = document.getElementById('options-list'); opts.innerHTML = "";
+            ['A','B','C','D'].forEach(l => {
+                let d = document.createElement('div');
+                d.className = "option " + (userAnswers[currentIndex] === l ? "selected" : "");
+                d.innerText = l + ". " + q[l];
+                d.onclick = () => { userAnswers[currentIndex] = l; renderQuestion(); };
+                opts.appendChild(d);
             });
         }
 
-        function nextQ() {
+        function nextQ() { 
             if(!userAnswers[currentIndex]) return alert("መልስ ይምረጡ!");
-            if(currentIndex < currentQuestions.length - 1) { currentIndex++; renderQuestion(); }
+            if(currentIndex < currentQuestions.length-1) { currentIndex++; renderQuestion(); } 
         }
         function prevQ() { if(currentIndex > 0) { currentIndex--; renderQuestion(); } }
 
         function startTimer() {
             timer = setInterval(() => {
                 timeRemaining--;
-                let m = Math.floor(timeRemaining/60);
-                let s = timeRemaining % 60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                let m = Math.floor(timeRemaining/60), s = timeRemaining % 60;
+                document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
                 if(timeRemaining <= 0) finishExam();
             }, 1000);
         }
 
-        // 4. Admin Logic - Bulk Upload (Smart Parsing)
-        function saveQuestions() {
-            let stream = document.getElementById('admin-stream').value;
-            let sub = document.getElementById('admin-sub').value;
-            let text = document.getElementById('bulk-input').value;
-            
-            if(!sub || !text) return alert("እባክዎ ሁሉንም ይሙሉ!");
-
-            // ቀላል Parsing Logic: ጥያቄዎችን በ አዲስ መስመር ይለያል
-            // እዚህ ጋር በረከት፤ ለሙከራ ያህል በ JSON ፎርማት ቢገቡ ይመረጣል
-            // ግን ለጊዜው ቀላሉን እንስራ
-            let lines = text.split('\n');
-            let questions = [];
-            // ምሳሌ parsing (አድሚኑ በዝርዝር የጻፈውን ይቀበላል)
-            // ለሙከራ ያህል ቋሚ ጥያቄ እናድርገው
-            questions.push({text: text.substring(0,30) + "...", A:"Option 1", B:"Option 2", C:"Option 3", D:"Option 4", ans: "A"});
-
-            let data = JSON.parse(localStorage.getItem('exams') || "{}");
-            if(!data[stream]) data[stream] = {};
-            data[stream][sub] = questions;
-            localStorage.setItem('exams', JSON.stringify(data));
-            alert("ጥያቄው በተሳካ ሁኔታ ተጭኗል!");
-            location.reload();
-        }
-
         function finishExam() {
-            clearInterval(timer);
-            hideAll();
+            clearInterval(timer); hideAll();
             document.getElementById('result-page').classList.remove('hidden');
             let score = 0;
             currentQuestions.forEach((q, i) => { if(userAnswers[i] === q.ans) score++; });
-            document.getElementById('score-display').innerText = `${score} / ${currentQuestions.length}`;
+            document.getElementById('score-display').innerText = score + " / " + currentQuestions.length;
         }
 
         function hideAll() {
